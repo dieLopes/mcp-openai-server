@@ -2,7 +2,7 @@
 
 Servidor MCP que utiliza o OpenAI para interpretar **mensagens em linguagem natural** e gerar comandos JSON para manipular planilhas do Google Sheets.
 
-Ele funciona em conjunto com um **serviço executor** (`sheet-executor`) que realiza as operações na planilha.
+Ele funciona em conjunto com um **serviço executor** (`sheet-manipulator`) que realiza as operações na planilha.
 
 ---
 
@@ -10,7 +10,7 @@ Ele funciona em conjunto com um **serviço executor** (`sheet-executor`) que rea
 
 - Receber mensagens em linguagem natural do usuário.
 - Converter a mensagem em um **comando JSON estruturado**.
-- Enviar o comando para o serviço `sheet-executor`.
+- Enviar o comando para o serviço `sheet-manipulator`.
 - Retornar o resultado da execução para o usuário.
 - Expor um **manifesto MCP** (`/mcp.json`) para registro em agentes MCP.
 
@@ -60,9 +60,9 @@ O servidor envia o prompt + mensagem para o OpenAI.
 
 OpenAI retorna JSON estruturado.
 
-Servidor chama o sheet-executor com o comando.
+Servidor chama o sheet-manipulator com o comando.
 
-sheet-executor realiza operação na planilha Google Sheets.
+sheet-manipulator realiza operação na planilha Google Sheets.
 
 Resultado é retornado ao usuário.
 
