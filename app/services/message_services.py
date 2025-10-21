@@ -12,19 +12,39 @@ class MessageService:
 
     @staticmethod
     def execute(msg: UserMessage) -> MessageResponse:
+        
         """
-        Envia a mensagem do usuário para o GPT, interpreta o comando retornado
-        e executa no servidor MCP via /execute.
+        Consulta o manifesto MCP, envia-o para o GPT como contexto,
+        e então executa o comando gerado no servidor MCP.
         """
+        try:
+            # 1️⃣ Lê o manifesto MCP
+            manifest_url = f"{Configs.SHEET_MANIPULATOR_URL}/mcp.json"
+            manifest = requests.get(manifest_url, timeout=5).json()
+        except Exception as e:
+            return MessageResponse(
+                status="erro",
+                message=f"Falha ao consultar manifesto MCP: {e}"
+            )
 
-        # 1️⃣ Monta o contexto do agente
-        messages = sheet_agent_prompt[:]
-        messages.append({
-            "role": "user",
-            "content": f"Mensagem: {msg.message}"
-        })
+        # 2️⃣ Monta o prompt incluindo as tools do manifesto
+        tools_description = "\n".join([
+            f"- {tool['name']}: {tool.get('description', '')}"
+            for tool in manifest.get("tools", [])
+        ])
 
-        # 2️⃣ Gera o comando via GPT
+        system_prompt = (
+            f"Você é um agente MCP. As ferramentas disponíveis são:\n{tools_description}\n\n"
+            "Dado o pedido do usuário, gere um JSON no formato aceito pela ferramenta apropriada.\n"
+            "Retorne **apenas o JSON**, sem explicações."
+        )
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": msg.message}
+        ]
+
+        # 3️⃣ GPT gera o comando JSON
         completion = openai_client.chat.completions.create(
             model=Configs.GPT_MODEL,
             messages=messages,
@@ -33,50 +53,22 @@ class MessageService:
 
         command = completion.choices[0].message.content.strip()
 
-        # 3️⃣ Tenta interpretar o comando como JSON
+        # 4️⃣ Interpreta o comando como JSON
         try:
             command_json = json.loads(command)
         except Exception as e:
             return MessageResponse(
                 status="erro",
-                message=f"Não foi possível interpretar o comando retornado pelo GPT: {e}",
+                message=f"Não foi possível interpretar o comando: {e}",
                 gpt_return=command
             )
 
-        # 4️⃣ Valida a tool no manifesto do MCP
+        # 5️⃣ Executa no servidor MCP
         try:
-            manifest_url = f"{Configs.SHEET_MCP_URL}/mcp.json"
-            manifest = requests.get(manifest_url, timeout=5).json()
-            available_tools = [t["name"] for t in manifest.get("tools", [])]
-
-            tool_name = command_json.get("tool")
-
-            if tool_name not in available_tools:
-                return MessageResponse(
-                    status="erro",
-                    message=f"A ferramenta '{tool_name}' não existe no servidor MCP.",
-                    gpt_return=command,
-                    command=command_json
-                )
-        except Exception as e:
-            return MessageResponse(
-                status="erro",
-                message=f"Falha ao consultar manifesto MCP: {e}",
-                gpt_return=command,
-                command=command_json
-            )
-
-        # 5️⃣ Executa a tool no servidor MCP
-        try:
-            execute_url = f"{Configs.SHEET_MCP_URL}/execute"
-            payload = {
-                "tool": tool_name,
-                "args": command_json.get("args", {})
-            }
-
+            execute_url = f"{Configs.SHEET_MANIPULATOR_URL}/execute"
             resp = requests.post(
                 execute_url,
-                json=payload,
+                json=command_json,
                 headers={"Content-Type": "application/json"},
                 timeout=10
             )
