@@ -21,7 +21,7 @@ Ele funciona em conjunto com um **serviço executor** (`sheets-mcp-server`) que 
 1. Crie um arquivo `.env` na raiz:
 
 ```
-SHEET_MANIPULATOR_URL=http://localhost:5000/executar
+SHEET_MCP_URL=http://localhost:5000/executar
 OPENAI_API_KEY=your_openai_api_key_here
 SHEET_NAME=Nome_planilha
 GPT_MODEL=gpt-3.5-turbo

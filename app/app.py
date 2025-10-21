@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import router
+from app.routes import message
 from starlette.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -8,4 +8,4 @@ app = FastAPI(
     ]
 )
 
-app.include_router(router.router)
+app.include_router(message.router)
