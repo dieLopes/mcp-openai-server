@@ -1,9 +1,14 @@
-from fastapi import FastAPI
-from dotenv import load_dotenv
-from app.routes import router
+import uvicorn
 
-load_dotenv()
 
-app = FastAPI(title="MCP OpenAI Server")
+def main():
+    uvicorn.run(
+        app="app.app:app",
+        host="0.0.0.0",
+        port=8090,
+        reload=True,
+    )
 
-app.include_router(router.router)
+
+if __name__ == "__main__":
+    main()
