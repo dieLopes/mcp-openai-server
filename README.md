@@ -40,10 +40,10 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ## Endpoints
 
-|Método	|Endpoint	|Descrição
--------------------------------
-|POST	|/message	|Recebe mensagem do usuário, gera comando JSON e chama serviço executor
-|GET	|/mcp.json	|Retorna o manifesto MCP do servidor
+| Método | Endpoint  | Descrição                                                      |
+|--------|-----------|----------------------------------------------------------------|
+| POST   | /message  | Recebe mensagem do usuário, gera comando JSON e chama executor |
+| GET    | /mcp.json | Retorna o manifesto MCP do servidor                            |
 
 ### Exemplo de requisição /message:
 ```json
