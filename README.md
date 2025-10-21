@@ -1,18 +1,18 @@
-# MCP OpenAI Server
+# Sheets OpenAI Client
 
-Servidor MCP que utiliza o OpenAI para interpretar **mensagens em linguagem natural** e gerar comandos JSON para manipular planilhas do Google Sheets.
+Client que busca informaçao do MCP e utiliza o OpenAI para interpretar **mensagens em linguagem natural** e gerar comandos JSON para manipular planilhas do Google Sheets.
 
-Ele funciona em conjunto com um **serviço executor** (`sheet-manipulator`) que realiza as operações na planilha.
+Ele funciona em conjunto com um **serviço executor** (`sheets-mcp-server`) que realiza as operações na planilha.
 
 ---
 
 ## ⚙️ Funcionalidades
 
 - Receber mensagens em linguagem natural do usuário.
+- Busca o formato json aceito pelo MCP
 - Converter a mensagem em um **comando JSON estruturado**.
-- Enviar o comando para o serviço `sheet-manipulator`.
+- Enviar o comando para o serviço `sheets-mcp-server`.
 - Retornar o resultado da execução para o usuário.
-- Expor um **manifesto MCP** (`/mcp.json`) para registro em agentes MCP.
 
 ---
 
@@ -56,13 +56,15 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 Usuário envia mensagem ao mcp-openai-server.
 
+O serviço busca o mcp.json para verificar o formato de entrado do endpoint
+
 O servidor envia o prompt + mensagem para o OpenAI.
 
 OpenAI retorna JSON estruturado.
 
-Servidor chama o sheet-manipulator com o comando.
+Servidor chama o sheets-mcp-server com o comando.
 
-sheet-manipulator realiza operação na planilha Google Sheets.
+sheets-mcp-server realiza operação na planilha Google Sheets.
 
 Resultado é retornado ao usuário.
 
@@ -79,13 +81,4 @@ sheet_agent_prompt = [
     {"role": "system", "content": "..."},
     {"role": "user", "content": "..."}
 ]
-```
-
-### 📄 Manifesto MCP
-
-O manifesto mcp.json descreve o servidor, suas ferramentas e schemas.
-Exemplo de uso:
-
-```bash
-curl http://localhost:8000/mcp.json
 ```
